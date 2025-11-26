@@ -22,13 +22,128 @@ func main() {
 	for i := 0; i < len(words); i++ {
 		val := words[i]
 
-		if val == "," || val == ";" || val == "!" || val == "?" || val == ":" || val == "..." {
+		if val == "," || val == ";" || val == "!" || val == "?" || val == ":" {
 			if i != 0 {
+
+				words[i-1] += val
+				if i == len(words)-1 {
+					words = words[:i]
+					break
+				} else {
+					words = append(words[:i], words[i+1:]...)
+					i--
+				}
+
+			}
+		}
+
+		if i > 0 && len(val) >= 1 && (val[0] == ',' || val[0] == ';' || val[0] == '!' || val[0] == '?' || val[0] == ':') {
+
+			words[i-1] += string(val[0])
+			words[i] = val[1:]
+
+		}
+
+		if len(val) >= 3 && val[:3] == "..." {
+			if len(val) == 2 {
 				words[i-1] += val
 				words = append(words[:i], words[i+1:]...)
 				i--
+			} else {
+				words[i-1] += val[:3]
+				words[i] = val[3:]
 			}
 		}
+
+		if len(val) >= 2 && val[:2] == "!?" {
+			if len(val) == 2 {
+				words[i-1] += val
+				words = append(words[:i], words[i+1:]...)
+				i--
+			} else {
+				words[i-1] += val[:2]
+				words[i] = val[2:]
+			}
+		}
+
+	}
+
+	count := 0
+	for _, val := range words {
+		if val == "'" {
+			count++
+		}
+	}
+	count /= 2
+
+	for i := 0; i < len(words); i++ {
+		val := words[i]
+
+		if val == "'" {
+			if count > 0 {
+				if i < len(words)-1 {
+					words[i+1] = val + words[i+1]
+					words = append(words[:i], words[i+1:]...)
+					count--
+				}
+			} else {
+
+				if val == "'" {
+					if i != 0 {
+
+						words[i-1] += val
+						if i == len(words)-1 {
+							words = words[:i]
+							break
+						} else {
+							words = append(words[:i], words[i+1:]...)
+							i--
+						}
+
+					}
+				}
+
+				if i > 0 && len(val) >= 1 && val[0] == '\'' {
+
+					words[i-1] += string(val[0])
+
+					words[i] = val[1:]
+
+				}
+
+			}
+		}
+	}
+
+	vowels := "aeiou"
+	// HEX and BIN and An and an
+	for i := 0; i < len(words); i++ {
+		val := words[i]
+
+		if val == "(hex)" && i != 0 {
+			words[i-1] = HexToDec(words[i-1])
+			words = append(words[:i], words[i+1:]...)
+			i--
+		}
+
+		if val == "(bin)" && i != 0 {
+			words[i-1] = BinToDec(words[i-1])
+			words = append(words[:i], words[i+1:]...)
+			i--
+		}
+
+		if val == "a" || val == "A" {
+			if i != len(words)-1 {
+				if strings.Contains(vowels, strings.ToLower(string(words[i+1][0]))) {
+					if val == "a" {
+						words[i] = "an"
+					} else {
+						words[i] = "An"
+					}
+				}
+			}
+		}
+
 	}
 
 	// to CAP and LOW and UP :
@@ -53,7 +168,7 @@ func main() {
 			} else {
 				k := TakeNumFromString(words[i+1])
 				Low(words, k, i-1)
-				fmt.Println(k)
+
 				i++
 			}
 		} else if len(val) >= 4 && val[:3] == "(up" {
@@ -119,4 +234,22 @@ func TakeNumFromString(s string) int {
 	}
 	ans, _ := strconv.Atoi(res)
 	return ans
+}
+
+func HexToDec(s string) string {
+	temp, err := strconv.ParseInt(s, 16, 64)
+	if err != nil {
+		return "0"
+	}
+	res := strconv.Itoa(int(temp))
+	return res
+}
+
+func BinToDec(s string) string {
+	temp, err := strconv.ParseInt(s, 2, 64)
+	if err != nil {
+		return "0"
+	}
+	res := strconv.Itoa(int(temp))
+	return res
 }
