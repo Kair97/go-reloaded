@@ -7,12 +7,13 @@ import (
 	"strings"
 )
 
+const alp = "abcdefghijklmnopqrstuvwxyz"
+
 func main() {
 	fmt.Println("Hi")
 	fmt.Println()
 	readF := os.Args[1]
 	writeF := os.Args[2]
-
 	content, _ := os.ReadFile(readF)
 
 	words := strings.Split(string(content), " ")
