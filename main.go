@@ -350,7 +350,7 @@ func HexToDec(s string) string {
 	s = strings.TrimSpace(s)
 	temp, err := strconv.ParseInt(s, 16, 64)
 	if err != nil {
-		return "0"
+		return s
 	}
 	res := strconv.Itoa(int(temp))
 	return res
@@ -360,7 +360,7 @@ func BinToDec(s string) string {
 	s = strings.TrimSpace(s)
 	temp, err := strconv.ParseInt(s, 2, 64)
 	if err != nil {
-		return "0"
+		return s
 	}
 	res := strconv.Itoa(int(temp))
 	return res
