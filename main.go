@@ -80,56 +80,6 @@ func main() {
 	// COMMA - TOMMA
 
 	
-
-	count := 0
-	for _, val := range words {
-		if val == "'" || strings.HasPrefix(val, "'") || strings.HasSuffix(val, "'") {
-			count++
-		}
-	}
-
-	count /= 2
-	
-	for i := 0; i < len(words); i++ {
-		val := words[i]
-
-		if strings.HasPrefix(val, "'") || strings.HasSuffix(val, "'") {
-			if count > 0 {
-				if val == "'" {
-					if i < len(words)-1 {
-						words[i+1] = val + words[i+1]
-						words = append(words[:i], words[i+1:]...)
-
-						count--
-					}
-				} else if strings.HasSuffix(val, "'") {
-					words[i] = words[i][:len(words[i])-1]
-				
-					words[i+1] = val[len(val)-1:] + words[i+1]
-				
-					count--
-					i++
-				} else if strings.HasPrefix(val, "'") {
-					count--
-				}
-			} else {
-				if val == "'" {
-					words[i-1] = words[i-1] + val
-					words = append(words[:i], words[i+1:]...)
-					i--
-				} else if strings.HasPrefix(val, "'") {
-					words[i-1] = words[i-1] + string(val[0])
-					words[i] = words[i][1:]
-
-				}
-			}
-		}
-	}
-	
-	
-
-	words = CleanStr(words)
-	
 	for i := 0; i < len(words); i++ {
 		val := words[i]
 		
@@ -183,8 +133,58 @@ func main() {
 			}
 		}
 
+	}	
+
+	words = CleanStr(words)
+
+	count := 0
+	for _, val := range words {
+		if val == "'" || strings.HasPrefix(val, "'") || strings.HasSuffix(val, "'") {
+			count++
+		}
 	}
 
+	count /= 2
+	
+	for i := 0; i < len(words); i++ {
+		val := words[i]
+
+		if strings.HasPrefix(val, "'") || strings.HasSuffix(val, "'") {
+			if count > 0 {
+				if val == "'" {
+					if i < len(words)-1 {
+						words[i+1] = val + words[i+1]
+						words = append(words[:i], words[i+1:]...)
+
+						count--
+					}
+				} else if strings.HasSuffix(val, "'") {
+					words[i] = words[i][:len(words[i])-1]
+				
+					words[i+1] = val[len(val)-1:] + words[i+1]
+				
+					count--
+					i++
+				} else if strings.HasPrefix(val, "'") {
+					count--
+				}
+			} else {
+				if val == "'" {
+					words[i-1] = words[i-1] + val
+					words = append(words[:i], words[i+1:]...)
+					i--
+				} else if strings.HasPrefix(val, "'") {
+					words[i-1] = words[i-1] + string(val[0])
+					words[i] = words[i][1:]
+
+				}
+			}
+		}
+	}
+	
+	
+
+	words = CleanStr(words)
 	
 
 	vowels := "aeiou"
@@ -349,7 +349,7 @@ func CleanStr(s []string) []string {
 		}
 
 	}
-	fmt.Println(ss)
+	
 	return strings.Split(ss, " ")
 }
 
