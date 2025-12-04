@@ -265,7 +265,7 @@ func main() {
 	fmt.Println()
 
 	contPaste := strings.Join(words, " ")
-	// contPaste = strings.TrimRight(contPaste, "!")
+	
 	os.WriteFile(writeF, []byte(contPaste), 0o644)
 
 	contR, _ := os.ReadFile(writeF)
