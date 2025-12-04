@@ -256,6 +256,7 @@ func main() {
 	}
 
 	words = punc(words)
+	words = fend(words)
 	
 	
 
@@ -456,5 +457,20 @@ func punc(words []string) []string{
 		}
 
 	}	
+	return words
+}
+
+func fend(words []string) []string{
+
+	for i := 0; i < len(words); i++{
+		val := words[i]
+
+		if notWord(val) && i != 0{
+			words[i-1] += val
+			words = append(words[:i], words[i+1:]...)
+			i--
+		}
+
+	}
 	return words
 }
