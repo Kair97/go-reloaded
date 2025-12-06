@@ -1,7 +1,14 @@
-Count 'One; Two, Three. Four! Five? Six: @seven'
+count 'one; TWO, three. four! Five? Six: @seven'
 
-'you' a optimist. 'human'
+'you' an optimist. 'human'
 
 'Helo'
 
 worsd.........?????????!!!!!!!
+
+An hour
+
+an apple
+an apple
+
+A robot

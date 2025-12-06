@@ -1,7 +1,14 @@
-count ' one ;two (up) ,THREE (low) . four !five ?six :seven ' (cap,8)
+count ' one ;two (up) ,THREE (low) . four !five ?six :seven ' (cap,3)
 
 ' you ' a optimist . ' human ' 
 
 ' helo (cap) '
 
 worsd. ... ..... ????? ??? ? ! ! !!!!!
+
+A hour
+
+a apple
+an apple
+
+AN robot
