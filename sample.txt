@@ -1,4 +1,4 @@
-count ' one ;two (up) ,THREE (low) . four !five ?six :seven ' (cap,3)
+count ' one ;two (up) ,THREE (low) . four !five ?six :seven ' (cap,     8  )
 
 ' you ' a optimist . ' human ' 
 
@@ -14,3 +14,5 @@ an apple
 AN robot
 
 '-1'
+
+" dfigjfd "

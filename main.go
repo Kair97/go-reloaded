@@ -1,10 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
+	"go-reloaded/funcs"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -22,79 +21,28 @@ func main() {
 
 	content, _ := os.ReadFile(readF)
 
-	// for hours it is like protection
-	content = bytes.ReplaceAll(content, []byte(":"), []byte(":@"))
-
 	// Handle multiple lines correctly
 	lines := strings.Split(string(content), "\n")
 	for li, line := range lines {
 		words := strings.Fields(line)
 
 		// Preprocess punctuation: separate leading/trailing punctuation
-		words = SeparatePunc(words)
-		
+		words = funcs.SeparatePunc(words)
+
 		// Markup processing: (cap), (low), (up)
 		for i := 0; i < len(words); i++ {
-			val := words[i]
 
-			// (cap) 
-			if strings.HasPrefix(val, "(cap") {
-				if val == "(cap)" && i > 0 {
-					Cap(words, 1, i-1)
-					words = append(words[:i], words[i+1:]...)
-					i--
-				} else if strings.HasSuffix(val, ")") {
-					k := TakeNumFromString(val)
-					Cap(words, k, i-1)
-					words = append(words[:i], words[i+1:]...)
-					i--
-				} else if strings.HasPrefix(val, "(cap,") && i > 0 {
-					k := TakeNumFromString(val)
-					Cap(words, k, i-1)
-					words = append(words[:i], words[i+1:]...)
-					i--
-				}
-			}
+			words = funcs.Ucl(words)
 
-			// (low)
-			if strings.HasPrefix(val, "(low") {
-				if val == "(low)" && i > 0 {
-					Low(words, 1, i-1)
-					words = append(words[:i], words[i+1:]...)
-					i--
-				} else if strings.HasSuffix(val, ")") {
-					k := TakeNumFromString(val)
-					Low(words, k, i-1)
-					words = append(words[:i], words[i+1:]...)
-					i--
-				}
-			}
-
-			// (up)
-			if strings.HasPrefix(val, "(up") {
-				if val == "(up)" && i > 0 {
-					Up(words, 1, i-1)
-					words = append(words[:i], words[i+1:]...)
-					i--
-				} else if strings.HasSuffix(val, ")") {
-					k := TakeNumFromString(val)
-					Up(words, k, i-1)
-					words = append(words[:i], words[i+1:]...)
-					i--
-				}
-			}
+			words = funcs.ReattachPunc(words)
+			words = funcs.MergeQuotes(words)
+			words = funcs.MergeDQuotes(words)
+			words = funcs.FixArticles(words)
+			lines[li] = strings.Join(words, " ")
 		}
-
-		words = ReattachPunc(words)
-		words = MergeQuotes(words)
-	words  = FixArticles(words)
-		lines[li] = strings.Join(words, " ")
 	}
 
 	contPaste := strings.Join(lines, "\n")
-
-	// (restore hours) 
-	contPaste = strings.ReplaceAll(contPaste, ":@" , ":")
 
 	os.WriteFile(writeF, []byte(contPaste), 0o644)
 
@@ -103,206 +51,4 @@ func main() {
 	fmt.Println()
 	fmt.Printf("Result: %v\n", string(contR))
 	fmt.Println()
-}
-
-func Cap(s []string, n int, m int) {
-	for n > 0 && m >= 0 {
-		if isWord(s[m]) {
-			if len(s[m]) == 1 {
-				s[m] = strings.ToUpper(s[m])
-			} else {
-				s[m] = strings.ToUpper(s[m][:1]) + strings.ToLower(s[m][1:])
-			}
-			n--
-		}
-		m--
-	}
-}
-
-func Low(s []string, n int, m int) {
-	for n > 0 && m >= 0 {
-		if isWord(s[m]) {
-			s[m] = strings.ToLower(s[m])
-			n--
-		}
-		m--
-	}
-}
-
-func Up(s []string, n int, m int) {
-	for n > 0 && m >= 0 {
-		if isWord(s[m]) {
-			s[m] = strings.ToUpper(s[m])
-			n--
-		}
-		m--
-	}
-}
-
-func TakeNumFromString(s string) int {
-	res := ""
-	for _, val := range s {
-		if val >= '0' && val <= '9' {
-			res += string(val)
-		}
-	}
-	if res == "" {
-		return 0
-	}
-	ans, _ := strconv.Atoi(res)
-	return ans
-}
-
-func isWord(s string) bool {
-	for _, val := range s {
-		if strings.Contains(alp, strings.ToLower(string(val))) {
-			return true
-		}
-	}
-	return false
-}
-
-// Separate leading/trailing punctuation from words, including quotes
-func SeparatePunc(words []string) []string {
-	var res []string
-	for _, w := range words {
-		prefix := ""
-		suffix := ""
-		for len(w) > 0 && strings.Contains(".,;:!?\"'", string(w[0])) { // added quotes
-			prefix += string(w[0])
-			w = w[1:]
-		}
-		for len(w) > 0 && strings.Contains(".,;:!?\"'", string(w[len(w)-1])) { // added quotes
-			suffix = string(w[len(w)-1]) + suffix
-			w = w[:len(w)-1]
-		}
-		if prefix != "" {
-			res = append(res, prefix)
-		}
-		if w != "" {
-			res = append(res, w)
-		}
-		if suffix != "" {
-			res = append(res, suffix)
-		}
-	}
-	return res
-}
-
-// Reattach punctuation after capitalization, including quotes
-func ReattachPunc(words []string) []string {
-	var res []string
-	for i := 0; i < len(words); i++ {
-		w := words[i]
-		// only attach punctuation that is not a word
-		if !isWord(w) && len(res) > 0 {
-			res[len(res)-1] += w
-		} else {
-			res = append(res, w)
-		}
-	}
-	return res
-}
-
-// FixArticles adjusts "a"/"an" based on the following word
-func FixArticles(words []string) []string {
-	vowels := "aeiouAEIOU"
-	// list of special words where 'h' is silent
-	silentH := map[string]bool{
-		"hour":   true,
-		"honest": true,
-		"honor":  true,
-		"heir":   true,
-	}
-
-	for i := 0; i < len(words)-1; i++ {
-		val := words[i]
-		next := words[i+1]
-
-		if !isWord(next) {
-			continue
-		}
-
-		lowerNext := strings.ToLower(next)
-		if strings.EqualFold(val, "a") || strings.EqualFold(val, "an") {
-			needsAn := false
-			firstChar := next[0]
-
-			if strings.Contains(vowels, string(firstChar)) {
-				needsAn = true
-			} else if silentH[lowerNext] {
-				needsAn = true
-			} else {
-				needsAn = false
-			}
-
-			// apply the change preserving capitalization
-			if needsAn {
-				if strings.EqualFold(val, "a") {
-					if val == "a" {
-						words[i] = "an"
-					} else if val == "A" {
-						words[i] = "An"
-					} else if val == "AN" {
-						words[i] = "AN"
-					}
-				}
-			} else {
-				if strings.EqualFold(val, "an") {
-					if val == "an" {
-						words[i] = "a"
-					} else if val == "An" {
-						words[i] = "A"
-					} else if val == "AN" {
-						words[i] = "A"
-					}
-				}
-			}
-		}
-	}
-	return words
-}
-
-// Merge quotes into surrounding words safely
-func MergeQuotes(words []string) []string {
-	for i := 0; i < len(words); i++ {
-		val := words[i]
-
-		// Skip empty strings
-		if val == "" {
-			continue
-		}
-
-		// Handle single quote
-		if val == "'" {
-			if i > 0 && i < len(words)-1 {
-				// merge with next word (arbitrary choice)
-				words[i+1] = val + words[i+1]
-				words = append(words[:i], words[i+1:]...)
-				i-- // stay at same index
-			} else if i > 0 { // at end
-				words[i-1] += val
-				words = append(words[:i], words[i+1:]...)
-				i--
-			} else if i < len(words)-1 { // at start
-				words[i+1] = val + words[i+1]
-				words = append(words[:i], words[i+1:]...)
-				i--
-			}
-			continue
-		}
-
-		// Leading quote
-		if strings.HasPrefix(val, "'") && len(val) > 1 && i > 0 {
-			words[i-1] += "'"
-			words[i] = val[1:]
-		}
-
-		// Trailing quote
-		if strings.HasSuffix(val, "'") && len(val) > 1 && i < len(words)-1 {
-			words[i+1] = "'" + words[i+1]
-			words[i] = val[:len(val)-1]
-		}
-	}
-	return words
 }

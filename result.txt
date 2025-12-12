@@ -1,6 +1,6 @@
-count' one; TWO, three. four! Five? Six: @seven'
+Count 'One; Two, Three. Four! Five? Six: Seven'
 
-'you' an optimist.' human'
+'you 'a optimist.' human'
 
 'Helo'
 
@@ -14,3 +14,7 @@ an apple
 A robot
 
 '-1'
+
+"dfigjfd"
+
+''Gggg''
